@@ -17,6 +17,35 @@ window.addEventListener('mousemove', (event) => {
     cursor.y = -(event.clientY / sizes.height - 0.5)
 })
 
+window.addEventListener('resize', () => {
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+window.addEventListener('dblclick', () => {
+    const fullscreenElement =
+        document.fullscreenElement || document.webkitFullscreenElement
+    if (!fullscreenElement) {
+        if (canvas.requestFullscreen) {
+            canvas.requestFullscreen()
+        } else if (canvas.webkitRequestFullscreen) {
+            canvas.webkitRequestFullscreen()
+        }
+    } else {
+        // leave fullscreen
+        if (document.exitFullscreen) {
+            document.exitFullscreen()
+        } else if (canvas.webkitExitFullscreen) {
+            canvas.webkitExitFullscreen()
+        }
+    }
+})
+
 /**
  * Object
  */
@@ -32,8 +61,8 @@ scene.add(mesh)
  * Sizes
  */
 const sizes = {
-    width: 800,
-    height: 600,
+    width: window.innerWidth,
+    height: window.innerHeight,
 }
 
 /**
@@ -49,6 +78,7 @@ const camera = new THREE.PerspectiveCamera(
 const controls = new OrbitControls(camera, canvas)
 // controls.target.y = 2
 controls.enableDamping = true
+
 controls.update()
 
 const aspectRatio = sizes.width / sizes.height
@@ -64,6 +94,7 @@ const renderer = new THREE.WebGLRenderer({
     canvas: canvas!,
 })
 renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.render(scene, camera)
 
 const clock = new THREE.Clock()
