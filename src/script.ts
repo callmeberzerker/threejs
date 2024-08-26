@@ -3,7 +3,24 @@ import GUI from 'lil-gui'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
-const gui = new GUI()
+const gui = new GUI({
+    width: 300,
+    title: 'My GUI',
+    closeFolders: true,
+})
+
+// gui.close()
+gui.hide()
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'h') {
+        // con
+        console.log('showing?')
+        gui.show(gui._hidden)
+    }
+})
+
+const cubeFolder = gui.addFolder('Awesome cube')
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')! as HTMLElement
@@ -65,7 +82,11 @@ const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
 
 geometry.setAttribute('position', positionsAttribute)
 
-const debugObject = {} as { color: string; spin: () => void }
+const debugObject = {} as {
+    color: string
+    spin: () => void
+    subdivision: number
+}
 
 debugObject.color = '#3e7058'
 
@@ -119,24 +140,46 @@ renderer.render(scene, camera)
 
 const clock = new THREE.Clock()
 
-gui.add(mesh.position, 'y').min(-3).max(3).step(0.01).name('elevation')
-gui.add(mesh, 'visible')
-gui.add(mesh.material, 'wireframe')
-gui.addColor(debugObject, 'color').onChange((e: any) => {
+cubeFolder.add(mesh.position, 'y').min(-3).max(3).step(0.01).name('elevation')
+cubeFolder.add(mesh, 'visible')
+cubeFolder.add(mesh.material, 'wireframe')
+cubeFolder.addColor(debugObject, 'color').onChange((e: any) => {
     mesh.material.color.set(debugObject.color)
 })
+
+// cubeFolder.add(geometry, 'widthSegments')
 
 const myObject = {
     myVariable: 1337,
 }
 
-gui.add(myObject, 'myVariable').min(-3).max(3).step(0.01).name('fff')
+cubeFolder.add(myObject, 'myVariable').min(-3).max(3).step(0.01).name('fff')
 
 debugObject.spin = () => {
     gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 })
 }
 
-gui.add(debugObject, 'spin')
+debugObject.subdivision = 2
+cubeFolder.add(debugObject, 'spin')
+cubeFolder
+    .add(debugObject, 'subdivision')
+    .min(1)
+    .max(20)
+    .step(1)
+    .name('subdivision')
+    .onFinishChange(() => {
+        const currentSubdivision = debugObject.subdivision
+        const geometry = new THREE.BoxGeometry(
+            1,
+            1,
+            1,
+            currentSubdivision,
+            currentSubdivision,
+            currentSubdivision
+        )
+        mesh.geometry.dispose()
+        mesh.geometry = geometry
+    })
 
 const tick = () => {
     // Call tick again on the next frame
