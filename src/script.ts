@@ -1,5 +1,9 @@
+import gsap from 'gsap'
+import GUI from 'lil-gui'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+
+const gui = new GUI()
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')! as HTMLElement
@@ -46,13 +50,29 @@ window.addEventListener('dblclick', () => {
     }
 })
 
-/**
- * Object
- */
+const geometry = new THREE.BufferGeometry()
+// const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0])
+// const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
+
+const count = 66
+const positionsArray = new Float32Array(count * 3 * 3)
+
+for (let i = 0; i < count * 3 * 3; i++) {
+    positionsArray[i] = (Math.random() - 0.5) * 4
+}
+
+const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
+
+geometry.setAttribute('position', positionsAttribute)
+
+const debugObject = {} as { color: string; spin: () => void }
+
+debugObject.color = '#3e7058'
 
 const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1, 5, 5, 5),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+    new THREE.BoxGeometry(1, 1, 1, 2, 2, 2),
+    // geometry,
+    new THREE.MeshBasicMaterial({ color: debugObject.color, wireframe: true })
 )
 
 scene.add(mesh)
@@ -98,6 +118,25 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.render(scene, camera)
 
 const clock = new THREE.Clock()
+
+gui.add(mesh.position, 'y').min(-3).max(3).step(0.01).name('elevation')
+gui.add(mesh, 'visible')
+gui.add(mesh.material, 'wireframe')
+gui.addColor(debugObject, 'color').onChange((e: any) => {
+    mesh.material.color.set(debugObject.color)
+})
+
+const myObject = {
+    myVariable: 1337,
+}
+
+gui.add(myObject, 'myVariable').min(-3).max(3).step(0.01).name('fff')
+
+debugObject.spin = () => {
+    gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 })
+}
+
+gui.add(debugObject, 'spin')
 
 const tick = () => {
     // Call tick again on the next frame
