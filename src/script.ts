@@ -12,10 +12,52 @@ const gui = new GUI({
 // gui.close()
 gui.hide()
 
+const loadingManager = new THREE.LoadingManager()
+
+loadingManager.onStart = () => {
+    console.log('loading started')
+}
+loadingManager.onLoad = () => {
+    console.log('loading finished')
+}
+
+loadingManager.onProgress = () => {
+    console.log('lm progressing')
+}
+
+loadingManager.onError = () => {
+    console.log('lm error')
+}
+const textureLoader = new THREE.TextureLoader(loadingManager)
+
+// const colorTexture = textureLoader.load('/textures/door/color.jpg')
+// const colorTexture = textureLoader.load('/textures/checkerboard-1024x1024.png')
+const colorTexture = textureLoader.load('/textures/minecraft.png')
+// const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+// const heightTexture = textureLoader.load('/textures/door/height.jpg')
+// const normalTexture = textureLoader.load('/textures/door/normal.jpg')
+// const ambientOcclusionTexture = textureLoader.load(
+//     '/textures/door/ambientOcclusion.jpg'
+// )
+// const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+// const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+
+// colorTexture.repeat.x = 2
+// colorTexture.repeat.y = 3
+
+// colorTexture.wrapS = THREE.MirroredRepeatWrapping
+// colorTexture.wrapT = THREE.MirroredRepeatWrapping
+
+// colorTexture.offset.x = 0.5
+// colorTexture.offset.y = 0.5
+// colorTexture.rotation = Math.PI * 0.25
+colorTexture.generateMipmaps = false
+colorTexture.minFilter = THREE.NearestFilter
+colorTexture.magFilter = THREE.NearestFilter
+// colorTexture.ma
+
 window.addEventListener('keydown', (event) => {
     if (event.key === 'h') {
-        // con
-        console.log('showing?')
         gui.show(gui._hidden)
     }
 })
@@ -67,10 +109,6 @@ window.addEventListener('dblclick', () => {
     }
 })
 
-const geometry = new THREE.BufferGeometry()
-// const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0])
-// const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
-
 const count = 66
 const positionsArray = new Float32Array(count * 3 * 3)
 
@@ -80,8 +118,6 @@ for (let i = 0; i < count * 3 * 3; i++) {
 
 const positionsAttribute = new THREE.BufferAttribute(positionsArray, 3)
 
-geometry.setAttribute('position', positionsAttribute)
-
 const debugObject = {} as {
     color: string
     spin: () => void
@@ -89,12 +125,13 @@ const debugObject = {} as {
 }
 
 debugObject.color = '#3e7058'
+colorTexture.colorSpace = THREE.SRGBColorSpace
 
-const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1, 2, 2, 2),
-    // geometry,
-    new THREE.MeshBasicMaterial({ color: debugObject.color, wireframe: true })
-)
+const geometry = new THREE.BoxGeometry(1, 1, 1)
+const material = new THREE.MeshBasicMaterial({ map: colorTexture })
+console.log(geometry.attributes.uv)
+
+const mesh = new THREE.Mesh(geometry, material)
 
 scene.add(mesh)
 
@@ -169,7 +206,7 @@ cubeFolder
     .name('subdivision')
     .onFinishChange(() => {
         const currentSubdivision = debugObject.subdivision
-        const geometry = new THREE.BoxGeometry(
+        const newGeometry = new THREE.BoxGeometry(
             1,
             1,
             1,
@@ -178,7 +215,7 @@ cubeFolder
             currentSubdivision
         )
         mesh.geometry.dispose()
-        mesh.geometry = geometry
+        mesh.geometry = newGeometry
     })
 
 const tick = () => {

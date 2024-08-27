@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 interface Document {
     webkitFullscreenElement: Element | null
 }
