@@ -36,11 +36,15 @@ const scene = new THREE.Scene()
 // material.side = THREE.DoubleSide
 
 // Mesh normal material
-const material = new THREE.MeshNormalMaterial()
+// const material = new THREE.MeshNormalMaterial()
 // material.wireframe = true
-material.flatShading = true
+// material.flatShading = true
 // material.map = doorNormalTexture
 // material.map = doorColorTexture
+
+// Mesh matcap material
+const material = new THREE.MeshMatcapMaterial()
+material.matcap = matcapTexture
 
 const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), material)
 const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material)
